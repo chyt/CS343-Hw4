@@ -72,29 +72,36 @@ class MyDialog:
             return plan
 
         plan = string.lower(plan)
-        words = string.split(plan) # A list of the words in the user command
-        result = plan # In case we cannot parse the plan propperly, return it unmodified
+        result = [] # Create an empty array to store the results, as there may be several of them
 
+        # Split up each individual command, separated by the word "and"
+        commands = string.split(plan, 'and')
 
-		#The verb phrase should come first, so look at the first word
-		#If the verb phase is present go ahead and parse the noun phrases
-        self.log_info("Expanding sentence 'S' to VP1 NP1 NP3 NP4 | VP2 NP1 NP3 | VP3 NP1 NP4,")
-        self.log_info("the identifying initial verb phrase...")
-        if words[0] == "mov" or words[0] == "move":
-            self.log_info("Case VP1 NP1 NP3 NP4 (\"Move\") found")
-            self.log_info("Identifying noun phrases...")
-            result = "Mov " + self.get_noun_phrases(plan)
-        elif words[0] == "pick":
-            self.log_info("Case VP2 NP1 NP3 (\"Move\") found.")
-            self.log_info("Identifying noun phrases...")            
-            result = "Pick " + self.get_noun_phrases(plan)
-        elif words[0] == "put":
-            self.log_info("Case VP3 NP1 NP4 (\"Move\") found.")
-            self.log_info("Identifying noun phrases...")            
-            result = "Put " + self.get_noun_phrases(plan)
-        else:
-            self.log_error(words, "Instructions must begin with Move, Pick or Put.")
-        return result
+        for command in commands:
+            self.log_info("Parsing command: " + command)
+            words = string.split(command) # A list of the words in the user command
+
+            #The verb phrase should come first, so look at the first word
+            #If the verb phase is present go ahead and parse the noun phrases
+            self.log_info("Identifying initial verb...")
+            if words[0] == "mov" or words[0] == "move":
+                self.log_info("Case VP1 NP1 NP3 NP4 (\"Move\") found")
+                self.log_info("Identifying noun phrases...")
+                result.append("Mov " + self.get_noun_phrases(command))
+            elif words[0] == "pick":
+                self.log_info("Case VP2 NP1 NP3 (\"Pick Up\") found.")
+                self.log_info("Identifying noun phrases...")
+                result.append("Pick " + self.get_noun_phrases(command))
+            elif words[0] == "put":
+                self.log_info("Case VP3 NP1 NP4 (\"Put\") found.")
+                self.log_info("Identifying noun phrases...")
+                result.append("Put " + self.get_noun_phrases(command))
+            else:
+                self.log_error(words, "Instructions must begin with Move, Pick or Put.")
+
+        if len(result) > 0:
+            return result
+        return plan
     
     def get_noun_phrases(self, plan):
         """
