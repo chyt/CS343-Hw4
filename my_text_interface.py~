@@ -121,13 +121,12 @@ class MyDialog:
         #then just look for the keywords "disk" and "pole", ignoring everything else
         for w in words:
             if w == "it":
-		self.log_info(is_first_time)
                 if is_first_time:
 		    # during the first iteration, self.it is still an empty string
                     self.log_error("No reference for \"it\"")
 		    return
                 else:
-                w = self.it
+                    w = self.it
 
             if "disk" in w:
                 self.log_info("disk \"{0}\" found!".format(w))

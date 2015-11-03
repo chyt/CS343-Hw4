@@ -119,7 +119,8 @@ class MyDialog:
         result = ""
         #asssume that the noun phrases are in a fixed order
         #then just look for the keywords "disk" and "pole", ignoring everything else
-        for w in words:
+        for i in range(0,len(words)):
+	    w = words[i]
             if w == "it":
                 if is_first_time:
 		    # during the first iteration, self.it is still an empty string
@@ -134,6 +135,18 @@ class MyDialog:
                 if is_first_time:
                     self.it = w
             elif "pole" in w:
+		if w == "pole":
+		    previous_word = words[i-1]
+		    if previous_word == "left":
+			w = "Pole1"
+		    elif previous_word == "middle":
+			w = "Pole2"
+		    elif previous_word == "right":
+			w = "Pole3"
+		    else:
+			# previous word not recognized
+                        self.log_error("Adjective \"{0}\" not recognized".format(previous_word))
+		        return
                 self.log_info("pole \"{0}\" found!".format(w))
                 result += w.title() + " "
         return result
