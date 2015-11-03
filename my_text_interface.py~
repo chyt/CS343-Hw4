@@ -52,7 +52,7 @@ class MyDialog:
 
         self.parsed_plan = ""
 
-	self.it = ""
+        self.it = ""
 
     def parse(self):
         if self.parsed_plan == "":
@@ -78,8 +78,8 @@ class MyDialog:
 
         # Split up each individual command, separated by the word "and"
         commands = string.split(plan, 'and')
-	
-	is_first_time = true
+
+        is_first_time = True
         for command in commands:
             self.log_info("Parsing command: " + command)
             words = string.split(command) # A list of the words in the user command
@@ -90,7 +90,6 @@ class MyDialog:
             if words[0] == "mov" or words[0] == "move":
                 self.log_info("Case VP1 NP1 NP3 NP4 (\"Move\") found")
                 self.log_info("Identifying noun phrases...")
-		
                 result.append("Mov " + self.get_noun_phrases(command, is_first_time))
             elif words[0] == "pick":
                 self.log_info("Case VP2 NP1 NP3 (\"Pick Up\") found.")
@@ -103,9 +102,9 @@ class MyDialog:
             else:
                 self.log_error(words, "Instructions must begin with Move, Pick or Put.")
 
-	if is_first_time:
-	    is_first_time = false	
-	
+            if is_first_time:
+                is_first_time = False
+
         if len(result) > 0:
             return result
         return plan
@@ -119,19 +118,24 @@ class MyDialog:
         words = string.split(plan)
         result = ""
         #asssume that the noun phrases are in a fixed order
-        #then just look for the keywords "disk" and "pole", ignoring everything elsee
+        #then just look for the keywords "disk" and "pole", ignoring everything else
         for w in words:
-	    # determine 
-	    if w == "it":
-		w = self.it
+            if w == "it":
+		self.log_info(is_first_time)
+                if is_first_time:
+		    # during the first iteration, self.it is still an empty string
+                    self.log_error("No reference for \"it\"")
+		    return
+                else:
+                w = self.it
 
             if "disk" in w:
                 self.log_info("disk \"{0}\" found!".format(w))
                 result += w.title() + " "
-		if is_first_time:
-		    self.it = w
-	    else if "pole" in w:
-		self.log_info("pole \"{0}\" found!".format(w))
+                if is_first_time:
+                    self.it = w
+            elif "pole" in w:
+                self.log_info("pole \"{0}\" found!".format(w))
                 result += w.title() + " "
         return result
 

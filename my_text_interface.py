@@ -78,8 +78,8 @@ class MyDialog:
 
         # Split up each individual command, separated by the word "and"
         commands = string.split(plan, 'and')
-        
-        is_first_time = true
+
+        is_first_time = True
         for command in commands:
             self.log_info("Parsing command: " + command)
             words = string.split(command) # A list of the words in the user command
@@ -102,52 +102,57 @@ class MyDialog:
             else:
                 self.log_error(words, "Instructions must begin with Move, Pick or Put.")
 
-        if is_first_time:
-            is_first_time = false
+            if is_first_time:
+                is_first_time = False
 
         if len(result) > 0:
             return result
         return plan
-
+    
     def get_noun_phrases(self, plan, is_first_time):
         """
         Helper method. Given a string representing a plan,
         finds the noun phrases by removing every word other than "disk*" or "pole*.
-                Does not check whether these are in the correct order."
+		Does not check whether these are in the correct order."
         """
         words = string.split(plan)
         result = ""
         #asssume that the noun phrases are in a fixed order
-        #then just look for the keywords "disk" and "pole", ignoring everything elsee
+        #then just look for the keywords "disk" and "pole", ignoring everything else
         for w in words:
-            # determine 
             if w == "it":
-                w = self.it
+                if is_first_time:
+		    # during the first iteration, self.it is still an empty string
+                    self.log_error("No reference for \"it\"")
+		    return
+                else:
+                    w = self.it
 
             if "disk" in w:
                 self.log_info("disk \"{0}\" found!".format(w))
                 result += w.title() + " "
                 if is_first_time:
                     self.it = w
-            else if "pole" in w:
+            elif "pole" in w:
                 self.log_info("pole \"{0}\" found!".format(w))
                 result += w.title() + " "
         return result
+
     def ok(self):
         if self.parsed_plan == "":
             self.parse()
 
         if (type(self.parsed_plan) == list):
-                for command_string in self.parsed_plan:
-                    print command_string
-            else:
-                print self.parsed_plan
-            self.top.destroy()
+    	    for command_string in self.parsed_plan:
+    	        print command_string
+    	else:
+    	    print self.parsed_plan
+    	self.top.destroy()
 
     def close(self):
-            self.value = "close"
-            print self.value
-            self.top.destroy()
+    	self.value = "close"
+    	print self.value
+    	self.top.destroy()
         
     def log_info(self, printable_object, message=""):
         s = "[INFO]{0}:{1}".format(printable_object, message)
