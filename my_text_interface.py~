@@ -64,8 +64,8 @@ class MyDialog:
             self.log_error("Already parsed plan: {0}, cannot parse new plan.".format(self.parsed_plan))
         
     def semantic_parser(self, plan):
-            #Write code for simple semantic grammar here
-            #Actions should be returned in the following format:
+        #Write code for simple semantic grammar here
+        #Actions should be returned in the following format:
             #1. Mov Object Source Destination
             #2. Pick Object Source
             #3. Put Object Destination
@@ -79,7 +79,6 @@ class MyDialog:
         # Split up each individual command, separated by the word "and"
         commands = string.split(plan, 'and')
 
-        is_first_time = True
         for command in commands:
             self.log_info("Parsing command: " + command)
             words = string.split(command) # A list of the words in the user command
@@ -90,38 +89,42 @@ class MyDialog:
             if words[0] == "mov" or words[0] == "move":
                 self.log_info("Case VP1 NP1 NP3 NP4 (\"Move\") found")
                 self.log_info("Identifying noun phrases...")
-                result.append("Mov " + self.get_noun_phrases(command, is_first_time))
+                result.append("Mov " + self.get_noun_phrases(command))
             elif words[0] == "pick":
                 self.log_info("Case VP2 NP1 NP3 (\"Pick Up\") found.")
                 self.log_info("Identifying noun phrases...")
-                result.append("Pick " + self.get_noun_phrases(command, is_first_time))
+                result.append("Pick " + self.get_noun_phrases(command))
             elif words[0] == "put":
                 self.log_info("Case VP3 NP1 NP4 (\"Put\") found.")
                 self.log_info("Identifying noun phrases...")
-                result.append("Put " + self.get_noun_phrases(command, is_first_time))
+                result.append("Put " + self.get_noun_phrases(command))
             else:
                 self.log_error(words, "Instructions must begin with Move, Pick or Put.")
-
-            if is_first_time:
-                is_first_time = False
 
         if len(result) > 0:
             return result
         return plan
     
-    def get_noun_phrases(self, plan, is_first_time):
+    def get_noun_phrases(self, plan):
         """
         Helper method. Given a string representing a plan,
         finds the noun phrases by removing every word other than "disk*" or "pole*.
 		Does not check whether these are in the correct order."
         """
         words = string.split(plan)
-        result = ""
+
+	subject = ""
+	from_noun = ""
+	to_noun = ""
+
+	position_prefix = ""
+
         #asssume that the noun phrases are in a fixed order
         #then just look for the keywords "disk" and "pole", ignoring everything else
-        for w in words:
+        for i in range(0,len(words)):
+	    w = words[i]
             if w == "it":
-                if is_first_time:
+                if self.it == "":
 		    # during the first iteration, self.it is still an empty string
                     self.log_error("No reference for \"it\"")
 		    return
@@ -130,13 +133,38 @@ class MyDialog:
 
             if "disk" in w:
                 self.log_info("disk \"{0}\" found!".format(w))
-                result += w.title() + " "
-                if is_first_time:
-                    self.it = w
+		subject = w.title()
+                self.it = w
+
+	    elif w == "from":
+		position_prefix = "from"
+	    elif w == "to" or w == "on":
+		position_prefix = "to"
+		
             elif "pole" in w:
+		if w == "pole":
+		    previous_word = words[i-1]
+		    if previous_word == "left":
+			w = "Pole1"
+		    elif previous_word == "middle":
+			w = "Pole2"
+		    elif previous_word == "right":
+			w = "Pole3"
+		    else:
+			# previous word not recognized
+                        self.log_error("Adjective \"{0}\" not recognized".format(previous_word))
+		        return
                 self.log_info("pole \"{0}\" found!".format(w))
-                result += w.title() + " "
-        return result
+		if position_prefix == "from":
+		    from_noun = w.title()
+		elif position_prefix == "to":
+		    to_noun = w.title()
+		else:
+                    # from/to prefix was not assigned
+		    self.log_error("From/to prefix was not assigned")
+		position_prefix = ""
+
+        return subject + " " + from_noun + " " + to_noun
 
     def ok(self):
         if self.parsed_plan == "":
@@ -169,8 +197,6 @@ class MyDialog:
         self.text.insert(tk.END, s)
         self.text.insert(tk.END, '\n')
         self.text.yview(tk.END)
-
-
 
 def main():
     root = tk.Tk()
