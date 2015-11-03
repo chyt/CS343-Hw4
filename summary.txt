@@ -1,0 +1,14 @@
+No special instructions needed to run agent.
+
+Compound commands:
+    Split up commmands by "and", creating a list of separate commands. Loop through each command, identifying the verb and call get_noun_phrases on the rest of the command.    
+    Always return the result as a list of commands rather than just as a string.
+
+Reverse order of NP3 and NP4:
+    Previously, the code just appended each part of the command to results in the order that the loop encountered it. Now, while looping through the words in the command, we identify poles based on flags triggered by the keywords: "from" or "to/on". Then, regardless of the order in which we encountered the poles, we return a string in the format that OpenNero recognizes (subject + "from" pole + "to/on" pole).
+
+"it":
+    We create a global variable ("self.it") which records the most recently identified disk. Whenever we encounter an "it" in the command, we just replace it with "self.it". If no disk was ever identified in the plan (ie we used "it" before referencing a disk), we return an error.
+
+Adjectives ("left", "middle", "right"):
+    Whenever we encounter a word that exactly matches the word "pole", we look at the previous word in the command, which should be "left", "middle", or "right". If so, we map these values to "Pole1", "Pole2", "Pole3" respectively. If not, we return an error.
